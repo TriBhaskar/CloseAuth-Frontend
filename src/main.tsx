@@ -8,9 +8,14 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
+import LoginPage from "./pages/LoginPage.tsx";
 
 const router = createBrowserRouter(
-  createRoutesFromElements(<Route path="/" element={<App />} />)
+  createRoutesFromElements(
+    <Route path="/" element={<App />}>
+      <Route path="login" element={<LoginPage />} />
+    </Route>
+  )
 );
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
