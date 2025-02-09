@@ -1,6 +1,8 @@
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { useState, useEffect } from "react";
+import "react-country-state-city/dist/react-country-state-city.css";
 import {
   Select,
   SelectContent,
@@ -11,7 +13,35 @@ import {
   SelectValue,
 } from "../ui/select";
 
+import { GetCity, GetCountries, GetState } from "react-country-state-city";
+import { City, Country, State } from "react-country-state-city/dist/esm/types";
+import { Textarea } from "../ui/textarea";
+
 export default function RegisterFieldTwo() {
+  const [country, setCountry] = useState<string | null>(null);
+  const [currentState, setCurrentState] = useState<string | null>(null);
+  const [countriesList, setCountriesList] = useState<Country[]>([]);
+  const [stateList, setStateList] = useState<State[]>([]);
+  const [city, setCity] = useState<string | null>(null);
+  const [cityList, setCitiesList] = useState<City[]>([]);
+
+  useEffect(() => {
+    GetCountries().then((result) => {
+      setCountriesList(result);
+    });
+  }, []);
+  useEffect(() => {
+    if (country)
+      GetState(parseInt(country)).then((result) => {
+        setStateList(result);
+      });
+  }, [country]);
+  useEffect(() => {
+    if (currentState && country)
+      GetCity(parseInt(country), parseInt(currentState)).then((result) => {
+        setCitiesList(result);
+      });
+  }, [currentState, country]);
   return (
     <>
       <div className="flex flex-col items-center text-center">
@@ -22,67 +52,78 @@ export default function RegisterFieldTwo() {
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="first_name">First Name</Label>
-          <Select>
+          <Label htmlFor="country">Country</Label>
+          <Select onValueChange={setCountry}>
             <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Select your city" />
+              <SelectValue placeholder="Select your country" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>Counties</SelectLabel>
-                <SelectItem value="apple">Apple</SelectItem>
-                <SelectItem value="banana">Banana</SelectItem>
-                <SelectItem value="blueberry">Blueberry</SelectItem>
-                <SelectItem value="grapes">Grapes</SelectItem>
-                <SelectItem value="pineapple">Pineapple</SelectItem>
+                <SelectLabel>Countries</SelectLabel>
+                {countriesList.map((country) => (
+                  <SelectItem key={country.id} value={country.id.toString()}>
+                    {country.name}
+                  </SelectItem>
+                ))}
               </SelectGroup>
             </SelectContent>
           </Select>
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="last_name">Last Name</Label>
-          <Select>
+          <Label htmlFor="state">State</Label>
+          <Select onValueChange={setCurrentState} disabled={!country}>
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Select your state" />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>State</SelectLabel>
-                <SelectItem value="apple">Apple</SelectItem>
-                <SelectItem value="banana">Banana</SelectItem>
-                <SelectItem value="blueberry">Blueberry</SelectItem>
-                <SelectItem value="grapes">Grapes</SelectItem>
-                <SelectItem value="pineapple">Pineapple</SelectItem>
+                <SelectLabel>States</SelectLabel>
+                {stateList.map((state) => (
+                  <SelectItem key={state.id} value={state.id.toString()}>
+                    {state.name}
+                  </SelectItem>
+                ))}
               </SelectGroup>
             </SelectContent>
           </Select>
         </div>
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="enterprisename">Enterprise name</Label>
+        <Label htmlFor="enterprisename">Enterprise Contact Number</Label>
         <Input
           id="enterprisename"
-          type="enterprisename"
+          type="number"
           placeholder="Google"
           required
         />
       </div>
-      <div className="grid gap-2">
-        <Label htmlFor="enterpriseusername">Enterprise username</Label>
-        <Input
-          id="enterpriseusername"
-          type="enterpriseusername"
-          placeholder="Google123"
-          required
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-2">
+          <Label htmlFor="city">City</Label>
+          <Select onValueChange={setCity} disabled={!currentState}>
+            <SelectTrigger className="w-[150px]">
+              <SelectValue placeholder="Select your state" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Cities</SelectLabel>
+                {cityList.map((city) => (
+                  <SelectItem key={city.id} value={city.id.toString()}>
+                    {city.name}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="pincode">Pincode</Label>
+          <Input id="pincode" type="pincode" placeholder="42205" required />
+        </div>
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" placeholder="m@example.com" required />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="phoneno">Phone no</Label>
-        <Input id="phoneno" type="phoneno" placeholder="1234567890" required />
+        <Label htmlFor="address">Enterprise Address</Label>
+        <Textarea placeholder="Enter Your Full Address" />
       </div>
       <Button type="submit" className="w-full">
         Register

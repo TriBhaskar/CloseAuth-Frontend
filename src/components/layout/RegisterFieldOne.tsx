@@ -22,15 +22,6 @@ export default function RegisterFieldOne() {
         </div>
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="enterprisename">Enterprise name</Label>
-        <Input
-          id="enterprisename"
-          type="enterprisename"
-          placeholder="Google"
-          required
-        />
-      </div>
-      <div className="grid gap-2">
         <Label htmlFor="enterpriseusername">Enterprise username</Label>
         <Input
           id="enterpriseusername"
@@ -39,14 +30,32 @@ export default function RegisterFieldOne() {
           required
         />
       </div>
+
       <div className="grid gap-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="password">Password</Label>
+        <Input id="password" type="password" placeholder="*****" required />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="cpassword">Confirm Password</Label>
+        <Input id="cpassword" type="cpassword" placeholder="*****" required />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="enterprisename">Enterprise Name</Label>
+        <Input
+          id="enterprisename"
+          type="enterprisename"
+          placeholder="Google"
+          required
+        />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="email">Enterprise Email</Label>
         <Input id="email" type="email" placeholder="m@example.com" required />
       </div>
-      <div className="grid gap-2">
+      {/* <div className="grid gap-2">
         <Label htmlFor="phoneno">Phone no</Label>
         <Input id="phoneno" type="phoneno" placeholder="1234567890" required />
-      </div>
+      </div> */}
       <Button type="submit" className="w-full">
         Get Started
       </Button>
