@@ -1,8 +1,15 @@
+import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
-export default function RegisterFieldOne() {
+interface RegisterFieldOneProps {
+  moveToStep: (step: number) => void;
+}
+
+export default function RegisterFieldOne({
+  moveToStep,
+}: RegisterFieldOneProps) {
   return (
     <>
       <div className="flex flex-col items-center text-center">
@@ -56,14 +63,14 @@ export default function RegisterFieldOne() {
         <Label htmlFor="phoneno">Phone no</Label>
         <Input id="phoneno" type="phoneno" placeholder="1234567890" required />
       </div> */}
-      <Button type="submit" className="w-full">
+      <Button type="button" className="w-full" onClick={() => moveToStep(2)}>
         Get Started
       </Button>
       <div className="text-center text-sm">
         Already have an account?{" "}
-        <a href="#" className="underline underline-offset-4">
+        <Link to="/login" className="underline underline-offset-4">
           Login
-        </a>
+        </Link>
       </div>
     </>
   );

@@ -12,6 +12,9 @@ export function RegisterForm({
 }: React.ComponentProps<"div">) {
   const [step, setStep] = useState(1);
 
+  const moveToStep = (step: number) => {
+    setStep(step);
+  };
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
     setStep(2);
@@ -30,7 +33,11 @@ export function RegisterForm({
           <form className="p-6 md:p-8" onSubmit={handleNext}>
             <div className="flex flex-col gap-6">
               <Progress value={step === 1 ? 50 : 100} />
-              {step === 1 ? <RegisterFieldOne /> : <RegisterFieldTwo />}
+              {step === 1 ? (
+                <RegisterFieldOne moveToStep={moveToStep} />
+              ) : (
+                <RegisterFieldTwo moveToStep={moveToStep} />
+              )}
             </div>
           </form>
         </CardContent>

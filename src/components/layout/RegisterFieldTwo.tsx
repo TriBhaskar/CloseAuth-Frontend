@@ -17,7 +17,13 @@ import { GetCity, GetCountries, GetState } from "react-country-state-city";
 import { City, Country, State } from "react-country-state-city/dist/esm/types";
 import { Textarea } from "../ui/textarea";
 
-export default function RegisterFieldTwo() {
+interface RegisterFieldTwoProps {
+  moveToStep: (step: number) => void;
+}
+
+export default function RegisterFieldTwo({
+  moveToStep,
+}: RegisterFieldTwoProps) {
   const [country, setCountry] = useState<string | null>(null);
   const [currentState, setCurrentState] = useState<string | null>(null);
   const [countriesList, setCountriesList] = useState<Country[]>([]);
@@ -125,9 +131,14 @@ export default function RegisterFieldTwo() {
         <Label htmlFor="address">Enterprise Address</Label>
         <Textarea placeholder="Enter Your Full Address" />
       </div>
-      <Button type="submit" className="w-full">
-        Register
-      </Button>
+      <div className="grid grid-cols-2 gap-4">
+        <Button type="submit" className="w-full" onClick={() => moveToStep(1)}>
+          Back
+        </Button>
+        <Button type="submit" className="w-full">
+          Register
+        </Button>
+      </div>
       <div className="text-center text-sm">
         Already have an account?{" "}
         <a href="#" className="underline underline-offset-4">
