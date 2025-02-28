@@ -4,10 +4,12 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
 interface RegisterFieldOneProps {
+  formik: any; // Replace with proper FormikProps type
   moveToStep: (step: number) => void;
 }
 
 export default function RegisterFieldOne({
+  formik,
   moveToStep,
 }: RegisterFieldOneProps) {
   return (

@@ -18,10 +18,12 @@ import { City, Country, State } from "react-country-state-city/dist/esm/types";
 import { Textarea } from "../ui/textarea";
 
 interface RegisterFieldTwoProps {
+  formik: any; // Replace with proper FormikProps type
   moveToStep: (step: number) => void;
 }
 
 export default function RegisterFieldTwo({
+  formik,
   moveToStep,
 }: RegisterFieldTwoProps) {
   const [country, setCountry] = useState<string | null>(null);
