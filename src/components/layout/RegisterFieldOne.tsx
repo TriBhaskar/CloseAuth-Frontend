@@ -2,9 +2,11 @@ import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
+import { FormikProps } from "formik";
+import { FormValues } from "@/interfaces/forms";
 
 interface RegisterFieldOneProps {
-  formik: any; // Replace with proper FormikProps type
+  formik: FormikProps<FormValues>; // Replace with proper FormikProps type
   moveToStep: (step: number) => void;
 }
 
@@ -22,19 +24,38 @@ export default function RegisterFieldOne({
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="first_name">First Name</Label>
-          <Input id="first_name" type="text" placeholder="John" required />
+          <Label htmlFor="firstName">First Name</Label>
+          <Input
+            id="firstName"
+            name="firstName"
+            type="text"
+            placeholder="John"
+            onChange={formik.handleChange}
+            value={formik.values.firstName}
+            required
+          />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="last_name">Last Name</Label>
-          <Input id="last_name" type="text" placeholder="Doe" required />
+          <Label htmlFor="lastName">Last Name</Label>
+          <Input
+            id="lastName"
+            name="lastName"
+            type="text"
+            placeholder="Doe"
+            onChange={formik.handleChange}
+            value={formik.values.lastName}
+            required
+          />
         </div>
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="enterpriseusername">Enterprise username</Label>
+        <Label htmlFor="enterpriseUsername">Enterprise username</Label>
         <Input
-          id="enterpriseusername"
-          type="enterpriseusername"
+          id="enterpriseUsername"
+          name="enterpriseUsername"
+          type="text"
+          onChange={formik.handleChange}
+          value={formik.values.enterpriseUsername}
           placeholder="Google123"
           required
         />
@@ -42,24 +63,51 @@ export default function RegisterFieldOne({
 
       <div className="grid gap-2">
         <Label htmlFor="password">Password</Label>
-        <Input id="password" type="password" placeholder="*****" required />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="cpassword">Confirm Password</Label>
-        <Input id="cpassword" type="cpassword" placeholder="*****" required />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="enterprisename">Enterprise Name</Label>
         <Input
-          id="enterprisename"
-          type="enterprisename"
+          id="password"
+          name="password"
+          type="password"
+          placeholder="*****"
+          onChange={formik.handleChange}
+          value={formik.values.password}
+          required
+        />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="confirmPassword">Confirm Password</Label>
+        <Input
+          id="confirmPassword"
+          name="confirmPassword"
+          type="password"
+          placeholder="*****"
+          onChange={formik.handleChange}
+          value={formik.values.confirmPassword}
+          required
+        />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="enterpriseName">Enterprise Name</Label>
+        <Input
+          id="enterpriseName"
+          name="enterpriseName"
+          type="text"
           placeholder="Google"
+          onChange={formik.handleChange}
+          value={formik.values.enterpriseName}
           required
         />
       </div>
       <div className="grid gap-2">
         <Label htmlFor="email">Enterprise Email</Label>
-        <Input id="email" type="email" placeholder="m@example.com" required />
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          placeholder="m@example.com"
+          onChange={formik.handleChange}
+          value={formik.values.enterpriseName}
+          required
+        />
       </div>
       {/* <div className="grid gap-2">
         <Label htmlFor="phoneno">Phone no</Label>

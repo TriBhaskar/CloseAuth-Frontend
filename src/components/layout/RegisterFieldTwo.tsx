@@ -16,9 +16,11 @@ import {
 import { GetCity, GetCountries, GetState } from "react-country-state-city";
 import { City, Country, State } from "react-country-state-city/dist/esm/types";
 import { Textarea } from "../ui/textarea";
+import { FormikProps } from "formik";
+import { FormValues } from "@/interfaces/forms";
 
 interface RegisterFieldTwoProps {
-  formik: any; // Replace with proper FormikProps type
+  formik: FormikProps<FormValues>; // Replace with proper FormikProps type
   moveToStep: (step: number) => void;
 }
 
@@ -61,7 +63,13 @@ export default function RegisterFieldTwo({
       <div className="grid grid-cols-2 gap-4">
         <div className="grid gap-2">
           <Label htmlFor="country">Country</Label>
-          <Select onValueChange={setCountry}>
+          <Select
+            onValueChange={(value) => {
+              formik.setFieldValue("country", value);
+              setCountry(value);
+            }}
+            value={formik.values.country}
+          >
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Select your country" />
             </SelectTrigger>
@@ -79,7 +87,14 @@ export default function RegisterFieldTwo({
         </div>
         <div className="grid gap-2">
           <Label htmlFor="state">State</Label>
-          <Select onValueChange={setCurrentState} disabled={!country}>
+          <Select
+            onValueChange={(value) => {
+              formik.setFieldValue("state", value);
+              setCurrentState(value);
+            }}
+            value={formik.values.state}
+            disabled={!country}
+          >
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Select your state" />
             </SelectTrigger>
@@ -97,18 +112,27 @@ export default function RegisterFieldTwo({
         </div>
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="enterprisename">Enterprise Contact Number</Label>
+        <Label htmlFor="contactNumber">Enterprise Contact Number</Label>
         <Input
-          id="enterprisename"
+          id="contactNumber"
+          name="contactNumber"
           type="number"
           placeholder="Google"
+          onChange={formik.handleChange}
+          value={formik.values.contactNumber}
           required
         />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="grid gap-2">
           <Label htmlFor="city">City</Label>
-          <Select onValueChange={setCity} disabled={!currentState}>
+          <Select
+            onValueChange={(value) => {
+              formik.setFieldValue("city", value);
+              setCity(value);
+            }}
+            value={formik.values.city}
+          >
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Select your state" />
             </SelectTrigger>
@@ -126,12 +150,27 @@ export default function RegisterFieldTwo({
         </div>
         <div className="grid gap-2">
           <Label htmlFor="pincode">Pincode</Label>
-          <Input id="pincode" type="pincode" placeholder="42205" required />
+          <Input
+            id="pincode"
+            name="pincode"
+            type="number"
+            placeholder="42205"
+            onChange={formik.handleChange}
+            value={formik.values.pincode}
+            required
+          />
         </div>
       </div>
       <div className="grid gap-2">
         <Label htmlFor="address">Enterprise Address</Label>
-        <Textarea placeholder="Enter Your Full Address" />
+        <Textarea
+          id="address"
+          name="address"
+          placeholder="Enter Your Full Address"
+          onChange={formik.handleChange}
+          value={formik.values.address}
+          required
+        />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <Button type="submit" className="w-full" onClick={() => moveToStep(1)}>
