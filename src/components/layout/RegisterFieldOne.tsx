@@ -4,6 +4,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { FormikProps } from "formik";
 import { FormValues } from "@/interfaces/forms";
+import { toast } from "sonner";
 
 interface RegisterFieldOneProps {
   formik: FormikProps<FormValues>; // Replace with proper FormikProps type
@@ -14,6 +15,28 @@ export default function RegisterFieldOne({
   formik,
   moveToStep,
 }: RegisterFieldOneProps) {
+  const handleNextStep = async () => {
+    // Dismiss all existing toasts
+    toast.dismiss();
+
+    // Trigger validation
+    const errors = await formik.validateForm();
+
+    if (Object.keys(errors).length > 0) {
+      // Show new validation errors with slight delay between each
+      Object.entries(errors).forEach(([field, errorMessage], index) => {
+        setTimeout(() => {
+          toast.error(field, {
+            description: errorMessage as string,
+            // duration: 4000,
+          });
+        }, index * 300);
+      });
+    } else {
+      moveToStep(2);
+    }
+  };
+
   return (
     <>
       <div className="flex flex-col items-center text-center">
@@ -105,15 +128,11 @@ export default function RegisterFieldOne({
           type="email"
           placeholder="m@example.com"
           onChange={formik.handleChange}
-          value={formik.values.enterpriseName}
+          value={formik.values.email}
           required
         />
       </div>
-      {/* <div className="grid gap-2">
-        <Label htmlFor="phoneno">Phone no</Label>
-        <Input id="phoneno" type="phoneno" placeholder="1234567890" required />
-      </div> */}
-      <Button type="button" className="w-full" onClick={() => moveToStep(2)}>
+      <Button type="button" className="w-full" onClick={handleNextStep}>
         Get Started
       </Button>
       <div className="text-center text-sm">

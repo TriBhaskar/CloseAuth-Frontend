@@ -28,8 +28,12 @@ const stepOneValidationSchema = Yup.object({
     .min(8, "Password must be at least 8 characters")
     .required("Password is required"),
   confirmPassword: Yup.string()
+    .required("Confirm Password is required")
     .oneOf([Yup.ref("password")], "Passwords must match")
-    .required("Confirm Password is required"),
+    .when("password", {
+      is: (val: string) => val?.length > 0,
+      then: (schema) => schema.required("Confirm Password is required"),
+    }),
   enterpriseName: Yup.string()
     .min(2, "Must be at least 2 characters")
     .required("Enterprise name is required"),
@@ -62,6 +66,8 @@ export function RegisterForm({
   const [step, setStep] = useState(1);
 
   const formik = useFormik({
+    validateOnChange: true,
+    validateOnBlur: true,
     initialValues: {
       // Step 1 values
       firstName: "",
@@ -83,9 +89,7 @@ export function RegisterForm({
       step === 1 ? stepOneValidationSchema : stepTwoValidationSchema,
     onSubmit: async (values) => {
       if (step === 1) {
-        if (await validateStepOne()) {
-          setStep(2);
-        }
+        setStep(2);
       } else {
         if (formik.isValid) {
           try {
@@ -103,26 +107,6 @@ export function RegisterForm({
       }
     },
   });
-
-  const validateStepOne = async () => {
-    try {
-      await stepOneValidationSchema.validate(formik.values, {
-        abortEarly: false,
-      });
-      return true;
-    } catch (error) {
-      if (error instanceof Yup.ValidationError) {
-        const errors: { [key: string]: string } = {};
-        error.inner.forEach((err) => {
-          if (err.path) {
-            errors[err.path] = err.message;
-          }
-        });
-        formik.setErrors(errors);
-      }
-      return false;
-    }
-  };
   return (
     <>
       <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -152,7 +136,7 @@ export function RegisterForm({
           <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
         </div>
       </div>
-      <Toaster />
+      <Toaster richColors />
     </>
   );
 }
