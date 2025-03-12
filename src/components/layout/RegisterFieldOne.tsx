@@ -7,7 +7,7 @@ import { FormValues } from "@/interfaces/forms";
 import { toast } from "sonner";
 
 interface RegisterFieldOneProps {
-  formik: FormikProps<FormValues>; // Replace with proper FormikProps type
+  formik: FormikProps<FormValues>;
   moveToStep: (step: number) => void;
 }
 
@@ -19,18 +19,52 @@ export default function RegisterFieldOne({
     // Dismiss all existing toasts
     toast.dismiss();
 
-    // Trigger validation
-    const errors = await formik.validateForm();
+    // Trigger validation for just step 1 fields
+    await formik.validateForm({
+      firstName: formik.values.firstName,
+      lastName: formik.values.lastName,
+      enterpriseUsername: formik.values.enterpriseUsername,
+      password: formik.values.password,
+      confirmPassword: formik.values.confirmPassword,
+      enterpriseName: formik.values.enterpriseName,
+      email: formik.values.email,
+    });
 
-    if (Object.keys(errors).length > 0) {
+    // Check for errors in step 1 fields
+    const hasErrors = Object.keys(formik.errors).some((key) =>
+      [
+        "firstName",
+        "lastName",
+        "enterpriseUsername",
+        "password",
+        "confirmPassword",
+        "enterpriseName",
+        "email",
+      ].includes(key)
+    );
+
+    if (hasErrors) {
       // Show new validation errors with slight delay between each
-      Object.entries(errors).forEach(([field, errorMessage], index) => {
-        setTimeout(() => {
-          toast.error(field, {
-            description: errorMessage as string,
-            // duration: 4000,
-          });
-        }, index * 300);
+      Object.entries(formik.errors).forEach(([field, errorMessage], index) => {
+        // Only show errors for step 1 fields
+        if (
+          [
+            "firstName",
+            "lastName",
+            "enterpriseUsername",
+            "password",
+            "confirmPassword",
+            "enterpriseName",
+            "email",
+          ].includes(field)
+        ) {
+          setTimeout(() => {
+            toast.error(field, {
+              description: errorMessage as string,
+              duration: 4000,
+            });
+          }, index * 300);
+        }
       });
     } else {
       moveToStep(2);
@@ -40,7 +74,7 @@ export default function RegisterFieldOne({
   return (
     <>
       <div className="flex flex-col items-center text-center">
-        <h1 className="text-2xl font-bold">Lets get started</h1>
+        <h1 className="text-2xl font-bold">Let's get started</h1>
         <p className="text-balance text-muted-foreground">
           Register to your CloseAuth account
         </p>
@@ -54,6 +88,7 @@ export default function RegisterFieldOne({
             type="text"
             placeholder="John"
             onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             value={formik.values.firstName}
             required
           />
@@ -66,6 +101,7 @@ export default function RegisterFieldOne({
             type="text"
             placeholder="Doe"
             onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
             value={formik.values.lastName}
             required
           />
@@ -78,6 +114,7 @@ export default function RegisterFieldOne({
           name="enterpriseUsername"
           type="text"
           onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
           value={formik.values.enterpriseUsername}
           placeholder="Google123"
           required
@@ -92,6 +129,7 @@ export default function RegisterFieldOne({
           type="password"
           placeholder="*****"
           onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
           value={formik.values.password}
           required
         />
@@ -104,6 +142,7 @@ export default function RegisterFieldOne({
           type="password"
           placeholder="*****"
           onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
           value={formik.values.confirmPassword}
           required
         />
@@ -116,6 +155,7 @@ export default function RegisterFieldOne({
           type="text"
           placeholder="Google"
           onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
           value={formik.values.enterpriseName}
           required
         />
@@ -128,6 +168,7 @@ export default function RegisterFieldOne({
           type="email"
           placeholder="m@example.com"
           onChange={formik.handleChange}
+          onBlur={formik.handleBlur}
           value={formik.values.email}
           required
         />

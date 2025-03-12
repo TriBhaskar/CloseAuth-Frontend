@@ -1,6 +1,7 @@
 import { FormikProps } from "formik";
 
 export interface FormValues {
+  // Step 1 values
   firstName: string;
   lastName: string;
   enterpriseUsername: string;
@@ -8,6 +9,7 @@ export interface FormValues {
   confirmPassword: string;
   enterpriseName: string;
   email: string;
+  // Step 2 values
   country: string;
   state: string;
   city: string;

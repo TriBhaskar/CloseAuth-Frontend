@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Toaster } from "../ui/sonner";
+import { FormValues } from "@/interfaces/forms";
 
 // Define validation schemas for both steps
 const stepOneValidationSchema = Yup.object({
@@ -29,11 +30,7 @@ const stepOneValidationSchema = Yup.object({
     .required("Password is required"),
   confirmPassword: Yup.string()
     .required("Confirm Password is required")
-    .oneOf([Yup.ref("password")], "Passwords must match")
-    .when("password", {
-      is: (val: string) => val?.length > 0,
-      then: (schema) => schema.required("Confirm Password is required"),
-    }),
+    .oneOf([Yup.ref("password")], "Passwords must match"),
   enterpriseName: Yup.string()
     .min(2, "Must be at least 2 characters")
     .required("Enterprise name is required"),
@@ -59,14 +56,20 @@ const stepTwoValidationSchema = Yup.object({
     .required("Address is required"),
 });
 
+// Combined validation schema for the entire form
+const combinedValidationSchema = Yup.object().shape({
+  ...stepOneValidationSchema.fields,
+  ...stepTwoValidationSchema.fields,
+});
+
 export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const [step, setStep] = useState(1);
 
-  const formik = useFormik({
-    validateOnChange: true,
+  const formik = useFormik<FormValues>({
+    validateOnChange: false, // Only validate on submit for better UX
     validateOnBlur: true,
     initialValues: {
       // Step 1 values
@@ -85,28 +88,29 @@ export function RegisterForm({
       contactNumber: "",
       address: "",
     },
-    validationSchema:
-      step === 1 ? stepOneValidationSchema : stepTwoValidationSchema,
+    validationSchema: combinedValidationSchema,
     onSubmit: async (values) => {
-      if (step === 1) {
-        setStep(2);
-      } else {
-        if (formik.isValid) {
-          try {
-            const registerRequest = {
-              ...values,
-            };
-            // Handle final form submission
-            console.log("Form submitted:", registerRequest);
-            // Add your API call here
-          } catch (error) {
-            console.error("Registration failed", error);
-            // toast.error("Registration failed");
-          }
+      if (step === 2) {
+        try {
+          const registerRequest = {
+            ...values,
+          };
+          // Handle final form submission
+          console.log("Form submitted:", registerRequest);
+          // Add your API call here
+
+          // Note: We're not showing the toast here anymore
+          // It's now handled directly in RegisterFieldTwo
+
+          return true; // Return true to indicate success
+        } catch (error) {
+          console.error("Registration failed", error);
+          return false; // Return false to indicate failure
         }
       }
     },
   });
+
   return (
     <>
       <div className={cn("flex flex-col gap-6", className)} {...props}>
