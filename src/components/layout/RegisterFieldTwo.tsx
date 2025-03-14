@@ -80,6 +80,7 @@ export default function RegisterFieldTwo({
     }
   }, [formik.values.state, formik.values.country]);
 
+  // In RegisterFieldTwo component's handleSubmit function
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     // Dismiss all existing toasts
@@ -108,42 +109,15 @@ export default function RegisterFieldTwo({
     );
 
     if (hasErrors) {
-      // Show validation errors with slight delay between each
-      Object.entries(formik.errors).forEach(([field, errorMessage], index) => {
-        // Only show errors for step 2 fields
-        if (
-          [
-            "country",
-            "state",
-            "city",
-            "pincode",
-            "contactNumber",
-            "address",
-          ].includes(field)
-        ) {
-          setTimeout(() => {
-            toast.error(field, {
-              description: errorMessage as string,
-              duration: 4000,
-            });
-          }, index * 300);
-        }
-      });
+      // Show validation errors...
     } else {
       try {
-        // No validation errors, submit the form
+        // Submit the form which triggers parent's onSubmit
         await formik.submitForm();
-
-        console.log("Registration successful field two", formik.values);
-        // Show success toast directly here instead of relying on the return value
-        toast.success("Registration Successful!", {
-          description: "Your account has been created successfully.",
-          duration: 4000,
-        });
       } catch (error) {
-        console.error("Registration failed", error);
-        toast.error("Registration Failed", {
-          description: "Something went wrong. Please try again.",
+        console.error("Submission error", error);
+        toast.error("Submission Failed", {
+          description: "An unexpected error occurred.",
           duration: 4000,
         });
       }

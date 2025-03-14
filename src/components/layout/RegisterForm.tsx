@@ -9,6 +9,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Toaster } from "../ui/sonner";
 import { FormValues } from "@/interfaces/forms";
+import { toast } from "sonner";
 
 // Define validation schemas for both steps
 const stepOneValidationSchema = Yup.object({
@@ -92,20 +93,24 @@ export function RegisterForm({
     onSubmit: async (values) => {
       if (step === 2) {
         try {
-          const registerRequest = {
-            ...values,
-          };
-          // Handle final form submission
+          const registerRequest = { ...values };
           console.log("Form submitted:", registerRequest);
-          // Add your API call here
+          // Simulate API call
+          // const response = await api.register(registerRequest);
 
-          // Note: We're not showing the toast here anymore
-          // It's now handled directly in RegisterFieldTwo
-
-          return true; // Return true to indicate success
+          // Show success toast
+          toast.success("Registration Successful!", {
+            description: "Your account has been created successfully.",
+            duration: 4000,
+          });
+          return true;
         } catch (error) {
           console.error("Registration failed", error);
-          return false; // Return false to indicate failure
+          toast.error("Registration Failed", {
+            description: "Something went wrong. Please try again.",
+            duration: 4000,
+          });
+          return false;
         }
       }
     },
