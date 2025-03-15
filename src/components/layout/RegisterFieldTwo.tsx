@@ -16,37 +16,31 @@ import {
 import { GetCity, GetCountries, GetState } from "react-country-state-city";
 import { City, Country, State } from "react-country-state-city/dist/esm/types";
 import { Textarea } from "../ui/textarea";
-import { FormikProps } from "formik";
 import { FormValues } from "@/interfaces/forms";
 import { toast } from "sonner";
+import { UseFormReturn } from "react-hook-form";
 
 interface RegisterFieldTwoProps {
-  formik: FormikProps<FormValues>;
+  formControls: UseFormReturn<FormValues>;
   moveToStep: (step: number) => void;
 }
 
 export default function RegisterFieldTwo({
-  formik,
+  formControls,
   moveToStep,
 }: RegisterFieldTwoProps) {
   const [countriesList, setCountriesList] = useState<Country[]>([]);
   const [stateList, setStateList] = useState<State[]>([]);
   const [cityList, setCitiesList] = useState<City[]>([]);
+  const [selectedCountry, setSelectedCountry] = useState<Country>();
+  const [selectedState, setSelectedState] = useState<State>();
 
-  // Memoize form field handlers for better performance
-  const handleContactChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      formik.handleChange(e);
-    },
-    [formik]
-  );
-
-  const handleAddressChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      formik.handleChange(e);
-    },
-    [formik]
-  );
+  const {
+    register,
+    formState: { errors, isSubmitting },
+    setValue,
+    trigger,
+  } = formControls;
 
   // Fetch countries on component mount
   useEffect(() => {
@@ -57,70 +51,47 @@ export default function RegisterFieldTwo({
 
   // Fetch states when country changes
   useEffect(() => {
-    if (formik.values.country) {
-      GetState(parseInt(formik.values.country)).then((result) => {
+    if (selectedCountry) {
+      GetState(selectedCountry).then((result) => {
         setStateList(result);
+        // Reset state and city selections when country changes
+        setSelectedState("");
+        setCitiesList([]);
+        setValue("state", "");
+        setValue("city", "");
       });
-    } else {
-      setStateList([]);
     }
-  }, [formik.values.country]);
+  }, [selectedCountry, setValue]);
 
   // Fetch cities when state changes
   useEffect(() => {
-    if (formik.values.state && formik.values.country) {
-      GetCity(
-        parseInt(formik.values.country),
-        parseInt(formik.values.state)
-      ).then((result) => {
+    if (selectedCountry && selectedState) {
+      GetCity(selectedCountry, selectedState).then((result) => {
         setCitiesList(result);
+        setValue("city", "");
       });
-    } else {
-      setCitiesList([]);
     }
-  }, [formik.values.state, formik.values.country]);
+  }, [selectedState, selectedCountry, setValue]);
 
-  // In RegisterFieldTwo component's handleSubmit function
-  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    // Dismiss all existing toasts
-    toast.dismiss();
+  const handleSubmit = async () => {
+    // Validate step 2 fields
+    const isValid = await trigger([
+      "country",
+      "state",
+      "city",
+      "pincode",
+      "contactNumber",
+      "address",
+    ]);
 
-    // Validate just step 2 fields
-    await formik.validateForm({
-      country: formik.values.country,
-      state: formik.values.state,
-      city: formik.values.city,
-      pincode: formik.values.pincode,
-      contactNumber: formik.values.contactNumber,
-      address: formik.values.address,
-    });
-
-    // Check for errors in step 2 fields
-    const hasErrors = Object.keys(formik.errors).some((key) =>
-      [
-        "country",
-        "state",
-        "city",
-        "pincode",
-        "contactNumber",
-        "address",
-      ].includes(key)
-    );
-
-    if (hasErrors) {
-      // Show validation errors...
-    } else {
-      try {
-        // Submit the form which triggers parent's onSubmit
-        await formik.submitForm();
-      } catch (error) {
-        console.error("Submission error", error);
-        toast.error("Submission Failed", {
-          description: "An unexpected error occurred.",
-          duration: 4000,
-        });
-      }
+    if (!isValid) {
+      // Show toast for each error
+      Object.keys(errors).forEach((key) => {
+        const errorMessage = errors[key as keyof FormValues]?.message;
+        if (errorMessage) {
+          toast.error(errorMessage as string);
+        }
+      });
     }
   };
 
@@ -137,14 +108,14 @@ export default function RegisterFieldTwo({
           <Label htmlFor="country">Country</Label>
           <Select
             onValueChange={(value) => {
-              formik.setFieldValue("country", value);
-              // Reset dependent fields when country changes
-              formik.setFieldValue("state", "");
-              formik.setFieldValue("city", "");
+              setSelectedCountry(value);
+              setValue("country", value);
+              trigger("country");
             }}
-            value={formik.values.country}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger
+              className={`w-full ${errors.country ? "border-red-500" : ""}`}
+            >
               <SelectValue placeholder="Select your country" />
             </SelectTrigger>
             <SelectContent>
@@ -158,19 +129,23 @@ export default function RegisterFieldTwo({
               </SelectGroup>
             </SelectContent>
           </Select>
+          {errors.country && (
+            <p className="text-xs text-red-500">{errors.country.message}</p>
+          )}
         </div>
         <div className="grid gap-2">
           <Label htmlFor="state">State</Label>
           <Select
+            disabled={!selectedCountry}
             onValueChange={(value) => {
-              formik.setFieldValue("state", value);
-              // Reset city when state changes
-              formik.setFieldValue("city", "");
+              setSelectedState(value);
+              setValue("state", value);
+              trigger("state");
             }}
-            value={formik.values.state}
-            disabled={!formik.values.country}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger
+              className={`w-full ${errors.state ? "border-red-500" : ""}`}
+            >
               <SelectValue placeholder="Select your state" />
             </SelectTrigger>
             <SelectContent>
@@ -184,32 +159,38 @@ export default function RegisterFieldTwo({
               </SelectGroup>
             </SelectContent>
           </Select>
+          {errors.state && (
+            <p className="text-xs text-red-500">{errors.state.message}</p>
+          )}
         </div>
       </div>
       <div className="grid gap-2">
         <Label htmlFor="contactNumber">Enterprise Contact Number</Label>
         <Input
+          {...register("contactNumber")}
           id="contactNumber"
           name="contactNumber"
-          type="tel" // Changed from number to tel for better semantics
+          type="tel"
           placeholder="1234567890"
-          onChange={handleContactChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.contactNumber}
-          required
+          className={errors.contactNumber ? "border-red-500" : ""}
         />
+        {errors.contactNumber && (
+          <p className="text-xs text-red-500">{errors.contactNumber.message}</p>
+        )}
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="grid gap-2">
           <Label htmlFor="city">City</Label>
           <Select
+            disabled={!selectedState}
             onValueChange={(value) => {
-              formik.setFieldValue("city", value);
+              setValue("city", value);
+              trigger("city");
             }}
-            value={formik.values.city}
-            disabled={!formik.values.state}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger
+              className={`w-full ${errors.city ? "border-red-500" : ""}`}
+            >
               <SelectValue placeholder="Select your city" />
             </SelectTrigger>
             <SelectContent>
@@ -223,41 +204,54 @@ export default function RegisterFieldTwo({
               </SelectGroup>
             </SelectContent>
           </Select>
+          {errors.city && (
+            <p className="text-xs text-red-500">{errors.city.message}</p>
+          )}
         </div>
         <div className="grid gap-2">
           <Label htmlFor="pincode">Pincode</Label>
           <Input
+            {...register("pincode")}
             id="pincode"
             name="pincode"
-            type="text" // Changed from number to text to prevent issues with leading zeros
-            pattern="\d*" // Ensures only digits are entered
-            maxLength={10}
+            type="text"
             placeholder="42205"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            value={formik.values.pincode}
-            required
+            className={errors.pincode ? "border-red-500" : ""}
           />
+          {errors.pincode && (
+            <p className="text-xs text-red-500">{errors.pincode.message}</p>
+          )}
         </div>
       </div>
       <div className="grid gap-2">
         <Label htmlFor="address">Enterprise Address</Label>
         <Textarea
+          {...register("address")}
           id="address"
           name="address"
           placeholder="Enter Your Full Address"
-          onChange={handleAddressChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.address}
-          required
+          className={errors.address ? "border-red-500" : ""}
         />
+        {errors.address && (
+          <p className="text-xs text-red-500">{errors.address.message}</p>
+        )}
       </div>
       <div className="grid grid-cols-2 gap-4">
-        <Button type="button" className="w-full" onClick={() => moveToStep(1)}>
+        <Button
+          type="button"
+          className="w-full"
+          onClick={() => moveToStep(1)}
+          disabled={isSubmitting}
+        >
           Back
         </Button>
-        <Button type="submit" className="w-full" onClick={handleSubmit}>
-          Register
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isSubmitting}
+          onClick={handleSubmit}
+        >
+          {isSubmitting ? "Processing..." : "Register"}
         </Button>
       </div>
       <div className="text-center text-sm">

@@ -2,72 +2,65 @@ import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { FormikProps } from "formik";
 import { FormValues } from "@/interfaces/forms";
 import { toast } from "sonner";
+import { UseFormReturn } from "react-hook-form";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "../ui/hover-card";
 
 interface RegisterFieldOneProps {
-  formik: FormikProps<FormValues>;
+  formControls: UseFormReturn<FormValues>;
   moveToStep: (step: number) => void;
 }
 
 export default function RegisterFieldOne({
-  formik,
+  formControls,
   moveToStep,
 }: RegisterFieldOneProps) {
+  const {
+    register,
+    formState: { errors, isSubmitting },
+    trigger,
+  } = formControls;
+
   const handleNextStep = async () => {
-    // Dismiss all existing toasts
+    // Clear any existing toasts
     toast.dismiss();
 
-    // Trigger validation for just step 1 fields
-    await formik.validateForm({
-      firstName: formik.values.firstName,
-      lastName: formik.values.lastName,
-      enterpriseUsername: formik.values.enterpriseUsername,
-      password: formik.values.password,
-      confirmPassword: formik.values.confirmPassword,
-      enterpriseName: formik.values.enterpriseName,
-      email: formik.values.email,
-    });
+    // Validate only the fields in step 1
+    const isValid = await trigger([
+      "firstName",
+      "lastName",
+      "enterpriseUsername",
+      "password",
+      "confirmPassword",
+      "enterpriseName",
+      "email",
+    ]);
 
-    // Check for errors in step 1 fields
-    const hasErrors = Object.keys(formik.errors).some((key) =>
-      [
-        "firstName",
-        "lastName",
-        "enterpriseUsername",
-        "password",
-        "confirmPassword",
-        "enterpriseName",
-        "email",
-      ].includes(key)
-    );
-
-    if (hasErrors) {
-      // Show new validation errors with slight delay between each
-      Object.entries(formik.errors).forEach(([field, errorMessage], index) => {
-        // Only show errors for step 1 fields
-        if (
-          [
-            "firstName",
-            "lastName",
-            "enterpriseUsername",
-            "password",
-            "confirmPassword",
-            "enterpriseName",
-            "email",
-          ].includes(field)
-        ) {
-          setTimeout(() => {
-            toast.error(field, {
-              description: errorMessage as string,
-              duration: 4000,
-            });
-          }, index * 300);
+    if (isValid) {
+      moveToStep(2);
+    } else {
+      const currentErrors = formControls.formState.errors;
+      let counter = 0; // Initialize counter for toast messages
+      // Display separate toast for each field with validation error, without timeouts
+      Object.entries(currentErrors).forEach(([field, error]) => {
+        console.log(counter++);
+        if (error && error.message) {
+          console.log(`Error in ${field}: ${error.message}`);
+          toast.error(error.message as string, {
+            id: `error-${field}`, // Use an ID to prevent duplicate toasts
+          });
         }
       });
-    } else {
-      moveToStep(2);
+
+      // If somehow no errors were found but validation failed, show a fallback message
+      if (Object.keys(currentErrors).length === 0) {
+        toast.error("Please fill out all required fields correctly.");
+      }
     }
   };
 
@@ -81,100 +74,99 @@ export default function RegisterFieldOne({
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="grid gap-2">
-          <Label htmlFor="firstName">First Name</Label>
+          <Label htmlFor="firstName">
+            First Name
+            <HoverCard>
+              <HoverCardTrigger>Hover</HoverCardTrigger>
+              <HoverCardContent>
+                The React Framework – created and maintained by @vercel.
+              </HoverCardContent>
+            </HoverCard>
+          </Label>
           <Input
+            {...register("firstName")}
             id="firstName"
             name="firstName"
             type="text"
             placeholder="John"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            value={formik.values.firstName}
-            required
+            className={errors.firstName ? "border-red-500" : ""}
           />
         </div>
         <div className="grid gap-2">
           <Label htmlFor="lastName">Last Name</Label>
           <Input
+            {...register("lastName")}
             id="lastName"
             name="lastName"
             type="text"
             placeholder="Doe"
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            value={formik.values.lastName}
-            required
+            className={errors.lastName ? "border-red-500" : ""}
           />
         </div>
       </div>
       <div className="grid gap-2">
         <Label htmlFor="enterpriseUsername">Enterprise username</Label>
         <Input
+          {...register("enterpriseUsername")}
           id="enterpriseUsername"
           name="enterpriseUsername"
           type="text"
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.enterpriseUsername}
-          placeholder="Google123"
-          required
+          placeholder="username"
+          className={errors.enterpriseUsername ? "border-red-500" : ""}
         />
       </div>
 
       <div className="grid gap-2">
         <Label htmlFor="password">Password</Label>
         <Input
+          {...register("password")}
           id="password"
           name="password"
           type="password"
           placeholder="*****"
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.password}
-          required
+          className={errors.password ? "border-red-500" : ""}
         />
       </div>
       <div className="grid gap-2">
         <Label htmlFor="confirmPassword">Confirm Password</Label>
         <Input
+          {...register("confirmPassword")}
           id="confirmPassword"
           name="confirmPassword"
           type="password"
           placeholder="*****"
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.confirmPassword}
-          required
+          className={errors.confirmPassword ? "border-red-500" : ""}
         />
       </div>
       <div className="grid gap-2">
         <Label htmlFor="enterpriseName">Enterprise Name</Label>
         <Input
+          {...register("enterpriseName")}
           id="enterpriseName"
           name="enterpriseName"
           type="text"
           placeholder="Google"
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.enterpriseName}
-          required
+          className={errors.enterpriseName ? "border-red-500" : ""}
         />
       </div>
       <div className="grid gap-2">
         <Label htmlFor="email">Enterprise Email</Label>
         <Input
+          {...register("email")}
           id="email"
           name="email"
           type="email"
           placeholder="m@example.com"
-          onChange={formik.handleChange}
-          onBlur={formik.handleBlur}
-          value={formik.values.email}
-          required
+          className={errors.email ? "border-red-500" : ""}
         />
       </div>
-      <Button type="button" className="w-full" onClick={handleNextStep}>
-        Get Started
+      <Button
+        type="button"
+        className="w-full"
+        onClick={handleNextStep}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? "Processing..." : "Get Started"}
       </Button>
       <div className="text-center text-sm">
         Already have an account?{" "}

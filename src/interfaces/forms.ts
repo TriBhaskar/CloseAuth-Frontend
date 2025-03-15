@@ -1,5 +1,3 @@
-import { FormikProps } from "formik";
-
 export interface FormValues {
   // Step 1 values
   firstName: string;
@@ -14,11 +12,6 @@ export interface FormValues {
   state: string;
   city: string;
   pincode: string;
-  contactNumber: string;
+  contactNumber: number;
   address: string;
-}
-
-export interface RegisterFieldOneProps {
-  formik: FormikProps<FormValues>;
-  moveToStep: (step: number) => void;
 }
