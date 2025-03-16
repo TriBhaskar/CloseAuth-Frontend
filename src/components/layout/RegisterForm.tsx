@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Toaster } from "../ui/sonner";
 import { Resolver, useForm } from "react-hook-form";
 import { FormValues } from "@/interfaces/forms";
+import { toast } from "sonner";
 // Combined validation schema for the entire form
 
 const resolver: Resolver<FormValues> = async (values) => {
@@ -128,10 +129,44 @@ export function RegisterForm({
   ...props
 }: React.ComponentProps<"div">) {
   const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const formControls = useForm<FormValues>({ resolver });
-  const { handleSubmit } = formControls;
+  const { handleSubmit, reset } = formControls;
 
-  const onSubmit = handleSubmit((data) => console.log(data));
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      setIsSubmitting(true);
+      reset(); // Reset the form after submission
+      console.log("Submitting data to API:", data);
+
+      // Make API call here
+      // Example:
+      // const response = await fetch('/api/register', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify(data),
+      // });
+      //
+      // if (!response.ok) {
+      //   throw new Error('Registration failed');
+      // }
+      //
+      // const responseData = await response.json();
+
+      // Show success message
+      toast.success("Registration successful!");
+
+      // Redirect or perform other actions after successful registration
+      // window.location.href = '/login';
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error("Registration failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  });
 
   return (
     <>
@@ -157,6 +192,8 @@ export function RegisterForm({
                   <RegisterFieldTwo
                     formControls={formControls}
                     moveToStep={setStep}
+                    handleSubmit={onSubmit}
+                    isSubmitting={isSubmitting}
                   />
                 )}
               </div>

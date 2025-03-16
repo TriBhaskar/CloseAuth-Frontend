@@ -28,7 +28,7 @@ export default function RegisterFieldOne({
 
   const handleNextStep = async () => {
     // Clear any existing toasts
-    toast.dismiss();
+    // toast.dismiss();
 
     // Validate only the fields in step 1
     const isValid = await trigger([
@@ -52,7 +52,7 @@ export default function RegisterFieldOne({
         if (error && error.message) {
           console.log(`Error in ${field}: ${error.message}`);
           toast.error(error.message as string, {
-            id: `error-${field}`, // Use an ID to prevent duplicate toasts
+            id: `error-${field}-${Date.now()}`, // Ensures unique ID
           });
         }
       });

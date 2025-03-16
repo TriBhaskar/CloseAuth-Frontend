@@ -1,7 +1,7 @@
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import "react-country-state-city/dist/react-country-state-city.css";
 import {
   Select,
@@ -23,21 +23,25 @@ import { UseFormReturn } from "react-hook-form";
 interface RegisterFieldTwoProps {
   formControls: UseFormReturn<FormValues>;
   moveToStep: (step: number) => void;
+  handleSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>;
+  isSubmitting: boolean;
 }
 
 export default function RegisterFieldTwo({
   formControls,
   moveToStep,
+  handleSubmit,
+  isSubmitting,
 }: RegisterFieldTwoProps) {
   const [countriesList, setCountriesList] = useState<Country[]>([]);
   const [stateList, setStateList] = useState<State[]>([]);
   const [cityList, setCitiesList] = useState<City[]>([]);
-  const [selectedCountry, setSelectedCountry] = useState<Country>();
-  const [selectedState, setSelectedState] = useState<State>();
+  const [countryId, setCountryId] = useState<string | null>(null);
+  const [stateId, setStateId] = useState<string | null>(null);
 
   const {
     register,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     setValue,
     trigger,
   } = formControls;
@@ -51,29 +55,29 @@ export default function RegisterFieldTwo({
 
   // Fetch states when country changes
   useEffect(() => {
-    if (selectedCountry) {
-      GetState(selectedCountry).then((result) => {
+    if (countryId) {
+      GetState(parseInt(countryId)).then((result) => {
         setStateList(result);
         // Reset state and city selections when country changes
-        setSelectedState("");
+        setStateId(null);
         setCitiesList([]);
         setValue("state", "");
         setValue("city", "");
       });
     }
-  }, [selectedCountry, setValue]);
+  }, [countryId, setValue]);
 
   // Fetch cities when state changes
   useEffect(() => {
-    if (selectedCountry && selectedState) {
-      GetCity(selectedCountry, selectedState).then((result) => {
+    if (countryId && stateId) {
+      GetCity(parseInt(countryId), parseInt(stateId)).then((result) => {
         setCitiesList(result);
         setValue("city", "");
       });
     }
-  }, [selectedState, selectedCountry, setValue]);
+  }, [stateId, countryId, setValue]);
 
-  const handleSubmit = async () => {
+  const validateFields = async () => {
     // Validate step 2 fields
     const isValid = await trigger([
       "country",
@@ -92,6 +96,10 @@ export default function RegisterFieldTwo({
           toast.error(errorMessage as string);
         }
       });
+    } else {
+      console.log("All fields are valid. Proceeding with form submission.");
+      // Proceed with form submission or next step
+      handleSubmit();
     }
   };
 
@@ -108,7 +116,7 @@ export default function RegisterFieldTwo({
           <Label htmlFor="country">Country</Label>
           <Select
             onValueChange={(value) => {
-              setSelectedCountry(value);
+              setCountryId(value);
               setValue("country", value);
               trigger("country");
             }}
@@ -129,16 +137,13 @@ export default function RegisterFieldTwo({
               </SelectGroup>
             </SelectContent>
           </Select>
-          {errors.country && (
-            <p className="text-xs text-red-500">{errors.country.message}</p>
-          )}
         </div>
         <div className="grid gap-2">
           <Label htmlFor="state">State</Label>
           <Select
-            disabled={!selectedCountry}
+            disabled={!countryId}
             onValueChange={(value) => {
-              setSelectedState(value);
+              setStateId(value);
               setValue("state", value);
               trigger("state");
             }}
@@ -159,9 +164,6 @@ export default function RegisterFieldTwo({
               </SelectGroup>
             </SelectContent>
           </Select>
-          {errors.state && (
-            <p className="text-xs text-red-500">{errors.state.message}</p>
-          )}
         </div>
       </div>
       <div className="grid gap-2">
@@ -174,15 +176,12 @@ export default function RegisterFieldTwo({
           placeholder="1234567890"
           className={errors.contactNumber ? "border-red-500" : ""}
         />
-        {errors.contactNumber && (
-          <p className="text-xs text-red-500">{errors.contactNumber.message}</p>
-        )}
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="grid gap-2">
           <Label htmlFor="city">City</Label>
           <Select
-            disabled={!selectedState}
+            disabled={!stateId}
             onValueChange={(value) => {
               setValue("city", value);
               trigger("city");
@@ -204,9 +203,6 @@ export default function RegisterFieldTwo({
               </SelectGroup>
             </SelectContent>
           </Select>
-          {errors.city && (
-            <p className="text-xs text-red-500">{errors.city.message}</p>
-          )}
         </div>
         <div className="grid gap-2">
           <Label htmlFor="pincode">Pincode</Label>
@@ -218,9 +214,6 @@ export default function RegisterFieldTwo({
             placeholder="42205"
             className={errors.pincode ? "border-red-500" : ""}
           />
-          {errors.pincode && (
-            <p className="text-xs text-red-500">{errors.pincode.message}</p>
-          )}
         </div>
       </div>
       <div className="grid gap-2">
@@ -232,11 +225,8 @@ export default function RegisterFieldTwo({
           placeholder="Enter Your Full Address"
           className={errors.address ? "border-red-500" : ""}
         />
-        {errors.address && (
-          <p className="text-xs text-red-500">{errors.address.message}</p>
-        )}
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 mt-4">
         <Button
           type="button"
           className="w-full"
@@ -246,15 +236,15 @@ export default function RegisterFieldTwo({
           Back
         </Button>
         <Button
-          type="submit"
+          type="button"
           className="w-full"
           disabled={isSubmitting}
-          onClick={handleSubmit}
+          onClick={validateFields}
         >
           {isSubmitting ? "Processing..." : "Register"}
         </Button>
       </div>
-      <div className="text-center text-sm">
+      <div className="text-center text-sm mt-2">
         Already have an account?{" "}
         <a href="/login" className="underline underline-offset-4">
           Login
