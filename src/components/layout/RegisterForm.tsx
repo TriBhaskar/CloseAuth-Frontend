@@ -9,6 +9,8 @@ import { Toaster } from "../ui/sonner";
 import { Resolver, useForm } from "react-hook-form";
 import { FormValues } from "@/interfaces/forms";
 import { toast } from "sonner";
+import { registerEnterprise } from "@/api/authapi";
+import { useNavigate } from "react-router-dom";
 // Combined validation schema for the entire form
 
 const resolver: Resolver<FormValues> = async (values) => {
@@ -129,6 +131,7 @@ export function RegisterForm({
   ...props
 }: React.ComponentProps<"div">) {
   const [step, setStep] = useState(1);
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formControls = useForm<FormValues>({ resolver });
   const { handleSubmit, reset } = formControls;
@@ -136,33 +139,37 @@ export function RegisterForm({
   const onSubmit = handleSubmit(async (data) => {
     try {
       setIsSubmitting(true);
-      reset(); // Reset the form after submission
       console.log("Submitting data to API:", data);
+      const registerEnterpriseRequest = {
+        userFirstName: data.firstName,
+        userLastName: data.lastName,
+        userName: data.enterpriseUsername,
+        userPassword: data.password,
+        enterpriseDetails: {
+          enterpriseName: data.enterpriseName,
+          enterpriseEmail: data.email,
+          enterpriseContactNumber: data.contactNumber.toString(),
+          enterpriseCountry: data.country,
+          enterpriseState: data.state,
+          enterpriseCity: data.city,
+          enterprisePinCode: data.pincode,
+          enterpriseAddress: data.address,
+        },
+      };
 
-      // Make API call here
-      // Example:
-      // const response = await fetch('/api/register', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(data),
-      // });
-      //
-      // if (!response.ok) {
-      //   throw new Error('Registration failed');
-      // }
-      //
-      // const responseData = await response.json();
-
-      // Show success message
-      toast.success("Registration successful!");
-
-      // Redirect or perform other actions after successful registration
-      // window.location.href = '/login';
+      const response = await registerEnterprise(registerEnterpriseRequest);
+      if (response.status === "success") {
+        toast.success(response.message + response.timestamp.toString());
+        reset();
+        // navigate("/verify-email");
+        // Optional: Redirect to login page
+      }
     } catch (error) {
-      console.error("Registration error:", error);
-      toast.error("Registration failed. Please try again.");
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Registration failed");
+      }
     } finally {
       setIsSubmitting(false);
     }
