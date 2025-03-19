@@ -8,9 +8,16 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
+import LoginPage from "./pages/LoginPage.tsx";
+import RegisterPage from "./pages/RegisterPage.tsx";
 
 const router = createBrowserRouter(
-  createRoutesFromElements(<Route path="/" element={<App />} />)
+  createRoutesFromElements(
+    <Route path="/" element={<App />}>
+      <Route path="login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+    </Route>
+  )
 );
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
