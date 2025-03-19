@@ -7,13 +7,13 @@ import RegisterFieldTwo from "./RegisterFieldTwo";
 import { useState } from "react";
 import { Toaster } from "../ui/sonner";
 import { Resolver, useForm } from "react-hook-form";
-import { FormValues } from "@/interfaces/forms";
+import { RegisterFormValues } from "@/interfaces/forms";
 import { toast } from "sonner";
 import { registerEnterprise } from "@/api/authapi";
 import { useNavigate } from "react-router-dom";
 // Combined validation schema for the entire form
 
-const resolver: Resolver<FormValues> = async (values) => {
+const resolver: Resolver<RegisterFormValues> = async (values) => {
   const errors: { [key: string]: { type: string; message: string } } = {};
 
   // Step 1 validations
@@ -133,7 +133,7 @@ export function RegisterForm({
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const formControls = useForm<FormValues>({ resolver });
+  const formControls = useForm<RegisterFormValues>({ resolver });
   const { handleSubmit, reset } = formControls;
 
   const onSubmit = handleSubmit(async (data) => {

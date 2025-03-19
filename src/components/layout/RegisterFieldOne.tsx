@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { FormValues } from "@/interfaces/forms";
+import { RegisterFormValues } from "@/interfaces/forms";
 import { toast } from "sonner";
 import { UseFormReturn } from "react-hook-form";
 import {
@@ -12,7 +12,7 @@ import {
 } from "../ui/hover-card";
 
 interface RegisterFieldOneProps {
-  formControls: UseFormReturn<FormValues>;
+  formControls: UseFormReturn<RegisterFormValues>;
   moveToStep: (step: number) => void;
 }
 
@@ -45,10 +45,8 @@ export default function RegisterFieldOne({
       moveToStep(2);
     } else {
       const currentErrors = formControls.formState.errors;
-      let counter = 0; // Initialize counter for toast messages
       // Display separate toast for each field with validation error, without timeouts
       Object.entries(currentErrors).forEach(([field, error]) => {
-        console.log(counter++);
         if (error && error.message) {
           console.log(`Error in ${field}: ${error.message}`);
           toast.error(error.message as string, {

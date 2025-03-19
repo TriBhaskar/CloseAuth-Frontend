@@ -1,4 +1,4 @@
-export interface FormValues {
+export interface RegisterFormValues {
   // Step 1 values
   firstName: string;
   lastName: string;
@@ -14,4 +14,9 @@ export interface FormValues {
   pincode: string;
   contactNumber: number;
   address: string;
+}
+
+export interface LoginFormValues {
+  email: string;
+  password: string;
 }

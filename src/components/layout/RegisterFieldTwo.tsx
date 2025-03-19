@@ -16,12 +16,12 @@ import {
 import { GetCity, GetCountries, GetState } from "react-country-state-city";
 import { City, Country, State } from "react-country-state-city/dist/esm/types";
 import { Textarea } from "../ui/textarea";
-import { FormValues } from "@/interfaces/forms";
+import { RegisterFormValues } from "@/interfaces/forms";
 import { toast } from "sonner";
 import { UseFormReturn } from "react-hook-form";
 
 interface RegisterFieldTwoProps {
-  formControls: UseFormReturn<FormValues>;
+  formControls: UseFormReturn<RegisterFormValues>;
   moveToStep: (step: number) => void;
   handleSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>;
   isSubmitting: boolean;
@@ -91,7 +91,7 @@ export default function RegisterFieldTwo({
     if (!isValid) {
       // Show toast for each error
       Object.keys(errors).forEach((key) => {
-        const errorMessage = errors[key as keyof FormValues]?.message;
+        const errorMessage = errors[key as keyof RegisterFormValues]?.message;
         if (errorMessage) {
           toast.error(errorMessage as string);
         }

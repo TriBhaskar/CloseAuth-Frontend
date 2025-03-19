@@ -27,6 +27,31 @@ export interface EnterpriseRegistrationResponse {
   timestamp: string;
 }
 
+export interface EnterpriseLoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface EnterpriseLoginResponse {
+  status: string;
+  message: string;
+  data: {
+    user: {
+      userId: number;
+      username: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+    };
+    auth: {
+      accessToken: string;
+      refreshToken: string;
+      expiresIn: number;
+    };
+  };
+}
+
 const API_URL = `${import.meta.env.VITE_API_URL}`;
 
 export const registerEnterprise = async (
@@ -46,6 +71,28 @@ export const registerEnterprise = async (
       "Content-Type": "application/json",
     },
     body: JSON.stringify(registerEnterpriseRequest),
+  });
+
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+
+  return response.json();
+};
+
+export const loginEnterprise = async (
+  loginRequest: EnterpriseLoginRequest
+): Promise<EnterpriseLoginResponse> => {
+  if (!API_URL) {
+    throw new Error("API URL is not configured");
+  }
+  console.log("Logging in with request:", loginRequest);
+  const response = await fetch(`${API_URL}/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(loginRequest),
   });
 
   if (!response.ok) {
