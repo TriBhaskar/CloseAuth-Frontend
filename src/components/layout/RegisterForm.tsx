@@ -161,7 +161,7 @@ export function RegisterForm({
       if (response.status === "success") {
         toast.success(response.message + response.timestamp.toString());
         reset();
-        // navigate("/verify-email");
+        navigate("/verify-email", { state: { email: data.email } });
         // Optional: Redirect to login page
       }
     } catch (error) {

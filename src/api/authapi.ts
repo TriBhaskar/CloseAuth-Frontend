@@ -52,6 +52,17 @@ export interface EnterpriseLoginResponse {
   };
 }
 
+export interface EnterpriseVerifyOtpRequest {
+  email: string;
+  otp: string;
+}
+
+export interface EnterpriseVerifyOtpResponse {
+  message: string;
+  ResponseStatus: string;
+  timestamp: string;
+}
+
 const API_URL = `${import.meta.env.VITE_API_URL}`;
 
 export const registerEnterprise = async (
@@ -93,6 +104,28 @@ export const loginEnterprise = async (
       "Content-Type": "application/json",
     },
     body: JSON.stringify(loginRequest),
+  });
+
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+
+  return response.json();
+};
+
+export const verifyOtp = async (
+  verifyOtpRequest: EnterpriseVerifyOtpRequest
+): Promise<EnterpriseVerifyOtpResponse> => {
+  if (!API_URL) {
+    throw new Error("API URL is not configured");
+  }
+  console.log("Verifying OTP with request:", verifyOtpRequest);
+  const response = await fetch(`${API_URL}/verify-otp`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(verifyOtpRequest),
   });
 
   if (!response.ok) {

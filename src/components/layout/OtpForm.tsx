@@ -14,9 +14,10 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "../ui/input-otp";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export default function OtpForm() {
+  const { email } = useLocation().state || {};
   return (
     <Card className="overflow-hidden">
       <CardHeader>
@@ -24,7 +25,7 @@ export default function OtpForm() {
           Verify Email Address
         </CardTitle>
         <CardDescription>
-          Please enter the OTP we've send to testasdsa@gmail.com
+          Please enter the OTP we've send to {email}
         </CardDescription>
       </CardHeader>
       <CardContent>
