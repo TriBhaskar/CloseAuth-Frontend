@@ -14,25 +14,53 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "../ui/input-otp";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { OtpFormValues } from "@/interfaces/forms";
 import { useState } from "react";
+import { verifyOtp } from "@/api/authapi";
+import { toast } from "sonner";
 
 export default function OtpForm() {
   const { email } = useLocation().state || {};
+  const navigate = useNavigate();
   const { handleSubmit, control } = useForm<OtpFormValues>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const onSubmit = handleSubmit((data) => {
-    setIsSubmitting(true);
-    // Simulate an API call to verify OTP
-    console.log(data);
-    // Handle OTP verification logic here
-    setTimeout(() => {
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      setIsSubmitting(true);
+      // Simulate an API call to verify OTP
+      console.log(data);
+      const enterpriseVerifyOtpRequest = {
+        email: email || "",
+        otp: data.otp,
+      };
+      if (enterpriseVerifyOtpRequest.email === "") {
+        console.error("Email is required for OTP verification");
+        navigate("/register", { replace: true });
+        setIsSubmitting(false);
+        return;
+      }
+      const response = await verifyOtp(enterpriseVerifyOtpRequest);
+      if (response.ResponseStatus === "SUCCESS") {
+        toast.success(response.message + response.timestamp.toString());
+        console.log("OTP verified successfully");
+      }
+      // Handle OTP verification logic here
+      setTimeout(() => {
+        setIsSubmitting(false);
+        // Add navigation or success handling here
+      }, 1500);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Registration failed");
+      }
+    } finally {
       setIsSubmitting(false);
-      // Add navigation or success handling here
-    }, 1500);
+    }
   });
 
   return (

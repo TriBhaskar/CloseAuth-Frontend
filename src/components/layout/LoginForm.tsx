@@ -83,8 +83,8 @@ export function LoginForm({
         password: data.password,
       };
       const response = await loginEnterprise(EnterpriseLoginRequest);
-      if (response.status === "success") {
-        toast.success(response.message + response.data.user.firstName);
+      if (response.status === "SUCCESS") {
+        toast.success(response.message + " " + response.data.user.firstName);
         reset();
         // navigate("/verify-email");
         // Optional: Redirect to login page

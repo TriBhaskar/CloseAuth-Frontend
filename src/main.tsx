@@ -11,18 +11,29 @@ import {
 import LoginPage from "./pages/LoginPage.tsx";
 import RegisterPage from "./pages/RegisterPage.tsx";
 import VerifyOtpPage from "./pages/VerifyOtpPage.tsx";
+import { RequireRegistration } from "./route/ProtectedOtpRoute.tsx";
+import { AuthProvider } from "./context/AuthContext.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<App />}>
       <Route path="login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/verify-email" element={<VerifyOtpPage />} />
+      <Route
+        path="/verify-email"
+        element={
+          <RequireRegistration>
+            <VerifyOtpPage />
+          </RequireRegistration>
+        }
+      />
     </Route>
   )
 );
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </StrictMode>
 );

@@ -11,6 +11,7 @@ import { RegisterFormValues } from "@/interfaces/forms";
 import { toast } from "sonner";
 import { registerEnterprise } from "@/api/authapi";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 // Combined validation schema for the entire form
 
 const resolver: Resolver<RegisterFormValues> = async (values) => {
@@ -134,6 +135,7 @@ export function RegisterForm({
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formControls = useForm<RegisterFormValues>({ resolver });
+  const { setRegistrationComplete } = useAuth();
   const { handleSubmit, reset } = formControls;
 
   const onSubmit = handleSubmit(async (data) => {
@@ -158,10 +160,11 @@ export function RegisterForm({
       };
 
       const response = await registerEnterprise(registerEnterpriseRequest);
-      if (response.status === "success") {
+      if (response.status === "SUCCESS") {
         toast.success(response.message + response.timestamp.toString());
         reset();
-        navigate("/verify-email", { state: { email: data.email } });
+        setRegistrationComplete(data.email); // Set auth context state
+        navigate("/verify-email");
         // Optional: Redirect to login page
       }
     } catch (error) {
