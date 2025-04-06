@@ -15,9 +15,26 @@ import {
   InputOTPSlot,
 } from "../ui/input-otp";
 import { Link, useLocation } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { OtpFormValues } from "@/interfaces/forms";
+import { useState } from "react";
 
 export default function OtpForm() {
   const { email } = useLocation().state || {};
+  const { handleSubmit, control } = useForm<OtpFormValues>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const onSubmit = handleSubmit((data) => {
+    setIsSubmitting(true);
+    // Simulate an API call to verify OTP
+    console.log(data);
+    // Handle OTP verification logic here
+    setTimeout(() => {
+      setIsSubmitting(false);
+      // Add navigation or success handling here
+    }, 1500);
+  });
+
   return (
     <Card className="overflow-hidden">
       <CardHeader>
@@ -25,37 +42,56 @@ export default function OtpForm() {
           Verify Email Address
         </CardTitle>
         <CardDescription>
-          Please enter the OTP we've send to {email}
+          Please enter the OTP we've sent to {email || "your email"}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form>
+        <form onSubmit={onSubmit} id="otp-form">
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1 items-center">
-              <InputOTP maxLength={6} pattern={REGEXP_ONLY_DIGITS}>
-                <InputOTPGroup>
-                  <InputOTPSlot index={0} />
-                  <InputOTPSlot index={1} />
-                  <InputOTPSlot index={2} />
-                </InputOTPGroup>
+              <Controller
+                control={control}
+                name="otp"
+                defaultValue=""
+                render={({ field }) => (
+                  <InputOTP
+                    maxLength={6}
+                    pattern={REGEXP_ONLY_DIGITS}
+                    value={field.value}
+                    onChange={field.onChange}
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                    </InputOTPGroup>
 
-                <InputOTPSeparator />
+                    <InputOTPSeparator />
 
-                <InputOTPGroup>
-                  <InputOTPSlot index={3} />
-                  <InputOTPSlot index={4} />
-                  <InputOTPSlot index={5} />
-                </InputOTPGroup>
-              </InputOTP>
+                    <InputOTPGroup>
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                )}
+              />
             </div>
           </div>
         </form>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button className="w-full">Verify</Button>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={isSubmitting}
+          form="otp-form"
+        >
+          {isSubmitting ? "Verifying..." : "Verify"}
+        </Button>
       </CardFooter>
       <div className="text-center text-sm mb-4">
-        Didn&apos;t recieve an email?{" "}
+        Didn&apos;t receive an email?{" "}
         <Link to="/register" className="underline underline-offset-4">
           Resend
         </Link>

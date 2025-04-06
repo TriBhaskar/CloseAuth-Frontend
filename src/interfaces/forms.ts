@@ -20,3 +20,8 @@ export interface LoginFormValues {
   email: string;
   password: string;
 }
+
+export interface OtpFormValues {
+  email: string;
+  otp: string;
+}
