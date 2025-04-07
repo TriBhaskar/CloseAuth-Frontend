@@ -59,7 +59,7 @@ export interface EnterpriseVerifyOtpRequest {
 
 export interface EnterpriseVerifyOtpResponse {
   message: string;
-  ResponseStatus: string;
+  status: string;
   timestamp: string;
 }
 
@@ -160,7 +160,7 @@ export const verifyOtp = async (
 
     const response: AxiosResponse<EnterpriseVerifyOtpResponse> =
       await apiClient.post("/verify-otp", verifyOtpRequest);
-
+    console.log("OTP verification response:", response);
     return response.data;
   } catch (error) {
     return handleApiError(error);

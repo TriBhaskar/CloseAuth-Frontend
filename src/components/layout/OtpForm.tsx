@@ -21,6 +21,7 @@ import { useState } from "react";
 import { verifyOtp } from "@/api/authapi";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
+import { Toaster } from "../ui/sonner";
 
 export default function OtpForm() {
   const { email } = useAuth();
@@ -44,15 +45,11 @@ export default function OtpForm() {
         return;
       }
       const response = await verifyOtp(enterpriseVerifyOtpRequest);
-      if (response.ResponseStatus === "SUCCESS") {
+      if (response.status === "SUCCESS") {
         toast.success(response.message + response.timestamp.toString());
         console.log("OTP verified successfully");
       }
-      // Handle OTP verification logic here
-      setTimeout(() => {
-        setIsSubmitting(false);
-        // Add navigation or success handling here
-      }, 1500);
+      navigate("/login", { replace: true });
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
@@ -65,66 +62,69 @@ export default function OtpForm() {
   });
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader>
-        <CardTitle className="text-center text-xl">
-          Verify Email Address
-        </CardTitle>
-        <CardDescription>
-          Please enter the OTP we've sent to {email || "your email"}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={onSubmit} id="otp-form">
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1 items-center">
-              <Controller
-                control={control}
-                name="otp"
-                defaultValue=""
-                render={({ field }) => (
-                  <InputOTP
-                    maxLength={6}
-                    pattern={REGEXP_ONLY_DIGITS}
-                    value={field.value}
-                    onChange={field.onChange}
-                  >
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                    </InputOTPGroup>
+    <>
+      <Card className="overflow-hidden">
+        <CardHeader>
+          <CardTitle className="text-center text-xl">
+            Verify Email Address
+          </CardTitle>
+          <CardDescription>
+            Please enter the OTP we've sent to {email || "your email"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onSubmit} id="otp-form">
+            <div className="grid w-full items-center gap-4">
+              <div className="flex flex-col space-y-1 items-center">
+                <Controller
+                  control={control}
+                  name="otp"
+                  defaultValue=""
+                  render={({ field }) => (
+                    <InputOTP
+                      maxLength={6}
+                      pattern={REGEXP_ONLY_DIGITS}
+                      value={field.value}
+                      onChange={field.onChange}
+                    >
+                      <InputOTPGroup>
+                        <InputOTPSlot index={0} />
+                        <InputOTPSlot index={1} />
+                        <InputOTPSlot index={2} />
+                      </InputOTPGroup>
 
-                    <InputOTPSeparator />
+                      <InputOTPSeparator />
 
-                    <InputOTPGroup>
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>
-                )}
-              />
+                      <InputOTPGroup>
+                        <InputOTPSlot index={3} />
+                        <InputOTPSlot index={4} />
+                        <InputOTPSlot index={5} />
+                      </InputOTPGroup>
+                    </InputOTP>
+                  )}
+                />
+              </div>
             </div>
-          </div>
-        </form>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isSubmitting}
-          form="otp-form"
-        >
-          {isSubmitting ? "Verifying..." : "Verify"}
-        </Button>
-      </CardFooter>
-      <div className="text-center text-sm mb-4">
-        Didn&apos;t receive an email?{" "}
-        <Link to="/register" className="underline underline-offset-4">
-          Resend
-        </Link>
-      </div>
-    </Card>
+          </form>
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isSubmitting}
+            form="otp-form"
+          >
+            {isSubmitting ? "Verifying..." : "Verify"}
+          </Button>
+        </CardFooter>
+        <div className="text-center text-sm mb-4">
+          Didn&apos;t receive an email?{" "}
+          <Link to="/register" className="underline underline-offset-4">
+            Resend
+          </Link>
+        </div>
+      </Card>
+      <Toaster richColors />
+    </>
   );
 }
