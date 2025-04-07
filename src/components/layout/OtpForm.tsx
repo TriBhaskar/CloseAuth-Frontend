@@ -14,15 +14,16 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "../ui/input-otp";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { OtpFormValues } from "@/interfaces/forms";
 import { useState } from "react";
 import { verifyOtp } from "@/api/authapi";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 export default function OtpForm() {
-  const { email } = useLocation().state || {};
+  const { email } = useAuth();
   const navigate = useNavigate();
   const { handleSubmit, control } = useForm<OtpFormValues>();
   const [isSubmitting, setIsSubmitting] = useState(false);

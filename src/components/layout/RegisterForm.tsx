@@ -162,8 +162,8 @@ export function RegisterForm({
       const response = await registerEnterprise(registerEnterpriseRequest);
       if (response.status === "SUCCESS") {
         toast.success(response.message + response.timestamp.toString());
-        reset();
         setRegistrationComplete(data.email); // Set auth context state
+        reset();
         navigate("/verify-email");
         // Optional: Redirect to login page
       }
