@@ -56,6 +56,7 @@ export default function RegisterFieldTwo({
   // Fetch states when country changes
   useEffect(() => {
     if (countryId) {
+      console.log("Country ID:", countryId);
       GetState(parseInt(countryId)).then((result) => {
         setStateList(result);
         // Reset state and city selections when country changes
@@ -116,8 +117,18 @@ export default function RegisterFieldTwo({
           <Label htmlFor="country">Country</Label>
           <Select
             onValueChange={(value) => {
+              // Find the selected country object
+              const selectedCountry = countriesList.find(
+                (country) => country.id.toString() === value
+              );
+
+              // Set the ID for fetching states
               setCountryId(value);
-              setValue("country", value);
+
+              // Set the country name in the form values
+              if (selectedCountry) {
+                setValue("country", selectedCountry.name);
+              }
               trigger("country");
             }}
           >
@@ -143,8 +154,18 @@ export default function RegisterFieldTwo({
           <Select
             disabled={!countryId}
             onValueChange={(value) => {
+              // Find the selected state object
+              const selectedState = stateList.find(
+                (state) => state.id.toString() === value
+              );
+
+              // Set the ID for fetching cities
               setStateId(value);
-              setValue("state", value);
+
+              // Set the state name in the form values
+              if (selectedState) {
+                setValue("state", selectedState.name);
+              }
               trigger("state");
             }}
           >
@@ -174,6 +195,9 @@ export default function RegisterFieldTwo({
           name="contactNumber"
           type="tel"
           placeholder="1234567890"
+          pattern="[0-9]*"
+          inputMode="numeric"
+          maxLength={10}
           className={errors.contactNumber ? "border-red-500" : ""}
         />
       </div>
@@ -183,6 +207,8 @@ export default function RegisterFieldTwo({
           <Select
             disabled={!stateId}
             onValueChange={(value) => {
+              // For cities, you're already setting the name properly
+              // since you're using city.name.toString() as the value
               setValue("city", value);
               trigger("city");
             }}
@@ -196,7 +222,7 @@ export default function RegisterFieldTwo({
               <SelectGroup>
                 <SelectLabel>Cities</SelectLabel>
                 {cityList.map((city) => (
-                  <SelectItem key={city.id} value={city.id.toString()}>
+                  <SelectItem key={city.id} value={city.name.toString()}>
                     {city.name}
                   </SelectItem>
                 ))}
