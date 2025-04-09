@@ -4,12 +4,21 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { IMAGES } from "@/constants/images";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { LoginFormValues } from "@/interfaces/forms";
 import { Resolver, SubmitErrorHandler, useForm } from "react-hook-form";
 import { toast, Toaster } from "sonner";
-import { loginEnterprise } from "@/api/authapi";
+import { forgotPassword, loginEnterprise } from "@/api/authapi";
 import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 
 const resolver: Resolver<LoginFormValues> = async (values) => {
   const errors: { [key: string]: { type: string; message: string } } = {};
@@ -45,6 +54,36 @@ const resolver: Resolver<LoginFormValues> = async (values) => {
     errors,
   };
 };
+
+interface ForgotPasswordFormValues {
+  email: string;
+}
+
+// Forgot password resolver
+const forgotPasswordResolver: Resolver<ForgotPasswordFormValues> = async (
+  values
+) => {
+  const errors: { [key: string]: { type: string; message: string } } = {};
+
+  // Email validation
+  if (!values.email) {
+    errors.email = {
+      type: "required",
+      message: "Email is required",
+    };
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+    errors.email = {
+      type: "pattern",
+      message: "Email is invalid",
+    };
+  }
+
+  return {
+    values: Object.keys(errors).length === 0 ? values : {},
+    errors,
+  };
+};
+
 export function LoginForm({
   className,
   ...props
@@ -57,7 +96,15 @@ export function LoginForm({
     formState: { errors },
     reset,
   } = formControls;
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
+
+  // Forgot password form controls
+  const forgotPasswordFormControls = useForm<ForgotPasswordFormValues>({
+    resolver: forgotPasswordResolver,
+  });
+  const [isResetSubmitting, setIsResetSubmitting] = useState(false);
+  const [forgotPasswordDialogOpen, setForgotPasswordDialogOpen] =
+    useState(false);
 
   // This function will run when validation fails
   const onError: SubmitErrorHandler<LoginFormValues> = (errors) => {
@@ -100,6 +147,41 @@ export function LoginForm({
     }
   };
 
+  // Handle forgot password form submission
+  const handleForgotPassword = async (data: ForgotPasswordFormValues) => {
+    setIsResetSubmitting(true);
+
+    try {
+      const forgotPasswordRequest = {
+        email: data.email,
+        forgotPasswordLink: "http://localhost:5173/reset-password",
+      };
+      const response = await forgotPassword(forgotPasswordRequest);
+      toast.success(response.message);
+      forgotPasswordFormControls.reset();
+      setForgotPasswordDialogOpen(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to process request");
+      }
+    } finally {
+      setIsResetSubmitting(false);
+    }
+  };
+
+  // Handle forgot password validation errors
+  const onForgotPasswordError: SubmitErrorHandler<ForgotPasswordFormValues> = (
+    errors
+  ) => {
+    Object.entries(errors).forEach(([field, error]) => {
+      toast.error(error.message, {
+        id: `forgot-${field}-error-${Date.now()}`,
+      });
+    });
+  };
+
   return (
     <>
       <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -130,12 +212,60 @@ export function LoginForm({
                 <div className="grid gap-2">
                   <div className="flex items-center">
                     <Label htmlFor="password">Password</Label>
-                    <a
-                      href="#"
-                      className="ml-auto text-sm underline-offset-2 hover:underline"
+                    <Dialog
+                      open={forgotPasswordDialogOpen}
+                      onOpenChange={setForgotPasswordDialogOpen}
                     >
-                      Forgot your password?
-                    </a>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="link"
+                          className="p-0 ml-auto text-sm underline-offset-2 h-auto"
+                        >
+                          Forgot your password?
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                          <DialogTitle>Reset your password</DialogTitle>
+                          <DialogDescription>
+                            Enter your email address and we'll send you a link
+                            to reset your password.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <form
+                          onSubmit={forgotPasswordFormControls.handleSubmit(
+                            handleForgotPassword,
+                            onForgotPasswordError
+                          )}
+                        >
+                          <div className="grid gap-4 py-4">
+                            <div className="grid gap-2">
+                              <Label htmlFor="reset-email">Email</Label>
+                              <Input
+                                id="reset-email"
+                                placeholder="name@example.com"
+                                className={
+                                  forgotPasswordFormControls.formState.errors
+                                    .email
+                                    ? "border-red-500"
+                                    : ""
+                                }
+                                {...forgotPasswordFormControls.register(
+                                  "email"
+                                )}
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button type="submit" disabled={isResetSubmitting}>
+                              {isResetSubmitting
+                                ? "Sending..."
+                                : "Send reset link"}
+                            </Button>
+                          </DialogFooter>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                   <Input
                     {...register("password")}

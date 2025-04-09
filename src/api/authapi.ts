@@ -70,6 +70,16 @@ export interface ApiErrorResponse {
   errors?: Record<string, string[]>;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+  forgotPasswordLink: string;
+}
+
+export interface ForgotPasswordResponse {
+  status: string;
+  message: string;
+  timestamp: string;
+}
 const API_URL = import.meta.env.VITE_API_URL;
 
 // Create axios instance with default config
@@ -161,6 +171,25 @@ export const verifyOtp = async (
     const response: AxiosResponse<EnterpriseVerifyOtpResponse> =
       await apiClient.post("/verify-otp", verifyOtpRequest);
     console.log("OTP verification response:", response);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const forgotPassword = async (
+  forgotPasswordRequest: ForgotPasswordRequest
+): Promise<ForgotPasswordResponse> => {
+  try {
+    if (!API_URL) {
+      throw new Error("API URL is not configured");
+    }
+
+    console.log("Requesting password reset with:", forgotPasswordRequest);
+
+    const response: AxiosResponse<ForgotPasswordResponse> =
+      await apiClient.post("/forgot-password", forgotPasswordRequest);
+
     return response.data;
   } catch (error) {
     return handleApiError(error);

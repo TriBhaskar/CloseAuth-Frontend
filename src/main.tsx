@@ -13,6 +13,7 @@ import RegisterPage from "./pages/RegisterPage.tsx";
 import VerifyOtpPage from "./pages/VerifyOtpPage.tsx";
 import { RequireRegistration } from "./route/ProtectedOtpRoute.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -27,6 +28,7 @@ const router = createBrowserRouter(
           </RequireRegistration>
         }
       />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
     </Route>
   )
 );
