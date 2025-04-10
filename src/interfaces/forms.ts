@@ -25,3 +25,8 @@ export interface OtpFormValues {
   email: string;
   otp: string;
 }
+
+export interface ResetPasswordFormValues {
+  newPassword: string;
+  confirmPassword: string;
+}

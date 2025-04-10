@@ -80,6 +80,17 @@ export interface ForgotPasswordResponse {
   message: string;
   timestamp: string;
 }
+
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  status: string;
+  message: string;
+}
 const API_URL = import.meta.env.VITE_API_URL;
 
 // Create axios instance with default config
@@ -189,6 +200,27 @@ export const forgotPassword = async (
 
     const response: AxiosResponse<ForgotPasswordResponse> =
       await apiClient.post("/forgot-password", forgotPasswordRequest);
+
+    return response.data;
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const resetPassword = async (
+  resetPasswordRequest: ResetPasswordRequest
+): Promise<ResetPasswordResponse> => {
+  try {
+    if (!API_URL) {
+      throw new Error("API URL is not configured");
+    }
+
+    console.log("Resetting password with request:", resetPasswordRequest);
+
+    const response: AxiosResponse<ResetPasswordResponse> = await apiClient.post(
+      "/reset-password",
+      resetPasswordRequest
+    );
 
     return response.data;
   } catch (error) {
